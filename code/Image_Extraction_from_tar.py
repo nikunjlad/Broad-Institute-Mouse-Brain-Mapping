@@ -28,7 +28,7 @@ def main():
     code_dir = os.getcwd()  # get the current directory
     os.chdir('../data/extracted')
     extraction_dir = os.getcwd()
-    os.chdir('../../data/mouse')  # traverse to the data directory
+    os.chdir('../../data/unextracted')  # traverse to the data directory
     data_dir = os.getcwd()  # get the path of the data directory
     print("Code dir: ", code_dir)
     print("Data dir: ", data_dir)
