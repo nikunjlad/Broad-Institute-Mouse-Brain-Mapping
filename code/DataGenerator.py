@@ -131,7 +131,7 @@ class DataGenerator:
         Img_Size = [512, 512]
 
         di = DataImport()
-        split_data = True
+        split_data = False
 
         try:
             if split_data:

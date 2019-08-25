@@ -6,6 +6,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 from tensorflow.contrib.keras.api.keras.utils import to_categorical
+from sklearn.preprocessing import LabelEncoder
 
 class Processing:
 
@@ -46,7 +47,9 @@ class Processing:
 
     @staticmethod
     def do_one_hot_encoding(just_labels):
-        one_hot_encoded_labels = to_categorical(just_labels)
+        le = LabelEncoder()
+        labels = le.fit_transform(just_labels)
+        one_hot_encoded_labels = to_categorical(labels, 3)
 
         return one_hot_encoded_labels
 

@@ -102,8 +102,6 @@ class DataImport:
             #             # self.save_image(valid_path + "/" + category, validation)
             #             # self.save_image(test_path + "/" + category, testing)
 
-            print(dl)
-
         combined = list(zip(data_list, label_list))
         shuffle(combined)
         data_list[:], label_list[:]= zip(*combined)
