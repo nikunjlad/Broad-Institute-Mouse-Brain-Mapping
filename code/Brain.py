@@ -5,12 +5,14 @@ Created by nikunjlad on 2019-08-24
 
 import numpy as np
 import os, sys, datetime
-from keras.preprocessing.image import ImageDataGenerator
-from keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense, concatenate, Input
-from keras.models import Sequential, Model
-from keras.losses import categorical_crossentropy
-from keras.optimizers import Adadelta
+from tensorflow.contrib.keras.api.keras.preprocessing.image import ImageDataGenerator
+# from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.contrib.keras.api.keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense, concatenate, Input
+from tensorflow.contrib.keras.api.keras.models import Sequential, Model
+from tensorflow.contrib.keras.api.keras.losses import categorical_crossentropy
+from tensorflow.contrib.keras.api.keras.optimizers import Adadelta
 from DataGenerator import *
+import tensorflow as tf
 from keras.utils.vis_utils import plot_model
 
 
@@ -22,6 +24,10 @@ class Brain(DataGenerator):
         self.debug = debug
 
     def main(self):
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+        tf.compat.v1.enable_eager_execution()
+        print(tf.VERSION)
+
         Img_Size = [512, 512]
 
         paths, binaries = self.get_data()
