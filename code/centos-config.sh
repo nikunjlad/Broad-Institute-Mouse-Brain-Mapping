@@ -47,7 +47,7 @@ fi
 # Python installation
 cd ~
 echo "Installing Python pre-requisites..."
-sudo yum install gcc openssl-devel bzip2-devel libffi-devel -y
+sudo yum install gcc openssl-devel bzip2-devel libffi-devel libsqlite3-devel -y
 
 if [[ $? -eq 0 ]]; then
     echo "Python pre-requisites installed successfully!"

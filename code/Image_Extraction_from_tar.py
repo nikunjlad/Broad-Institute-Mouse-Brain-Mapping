@@ -22,6 +22,7 @@ def extract_images_from_tar(brain_views, extraction_dir, classes):
                 tar_file = [file for file in dirs2 if file.endswith(".tar")][0]
                 tar = tarfile.open(tar_file)
                 tar.extractall(extract_paths[ind2])
+                print("Successfully extracted image to " + extract_paths[ind2])
 
 
 def main():
