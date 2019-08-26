@@ -26,7 +26,7 @@ class Brain(DataGenerator):
     def main(self):
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
         tf.compat.v1.enable_eager_execution()
-        print(tf.VERSION)
+        print(tf.version.VERSION)
 
         Img_Size = [512, 512]
 
@@ -67,13 +67,15 @@ class Brain(DataGenerator):
         print("Testing labels: ", test_labels.shape)
 
         model = Sequential()
-        model.add(Conv2D(4, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
-        model.add(Conv2D(8, (3, 3), activation='relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.25))
+        model.add(Conv2D(256, kernel_size=(7, 7), activation='relu', input_shape=input_shape))
+        model.add(MaxPooling2D(pool_size=(5, 5)))
+        model.add(Dropout(0.15))
+        model.add(Conv2D(128, (5, 5), activation='relu'))
+        model.add(MaxPooling2D(pool_size=(3, 3)))
+        model.add(Dropout(0.10))
         model.add(Flatten())
-        model.add(Dense(16, activation='relu'))
-        model.add(Dropout(0.5))
+        model.add(Dense(32, activation='relu'))
+        model.add(Dropout(0.25))
         model.add(Dense(3, activation='softmax'))
 
         model.compile(loss=categorical_crossentropy,
@@ -110,11 +112,6 @@ class Brain(DataGenerator):
 
         aug = ImageDataGenerator(
             rotation_range=20,
-            zoom_range=0.15,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            shear_range=0.15,
-            horizontal_flip=True,
             fill_mode="nearest")
 
         aug.fit(train_data)
