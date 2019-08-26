@@ -66,44 +66,44 @@ class Brain(DataGenerator):
         print("Validation labels: ", valid_labels.shape)
         print("Testing labels: ", test_labels.shape)
 
-        # model = Sequential()
-        # model.add(Conv2D(4, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
-        # model.add(Conv2D(8, (3, 3), activation='relu'))
-        # model.add(MaxPooling2D(pool_size=(2, 2)))
-        # model.add(Dropout(0.25))
-        # model.add(Flatten())
-        # model.add(Dense(16, activation='relu'))
-        # model.add(Dropout(0.5))
-        # model.add(Dense(3, activation='softmax'))
+        model = Sequential()
+        model.add(Conv2D(4, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+        model.add(Conv2D(8, (3, 3), activation='relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.25))
+        model.add(Flatten())
+        model.add(Dense(16, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(3, activation='softmax'))
 
-        # model.compile(loss=categorical_crossentropy,
-        #               optimizer=Adadelta(),
-        #               metrics=['accuracy'])
+        model.compile(loss=categorical_crossentropy,
+                      optimizer=Adadelta(),
+                      metrics=['accuracy'])
 
-        shape_x = 512
-        shape_y = 512
-        input_img = Input(shape=(shape_x, shape_y, 1))
-
-        ### 1st layer
-        layer_1 = Conv2D(10, (1, 1), padding='same', activation='relu')(input_img)
-        layer_1 = Conv2D(10, (3, 3), padding='same', activation='relu')(layer_1)
-
-        layer_2 = Conv2D(10, (1, 1), padding='same', activation='relu')(input_img)
-        layer_2 = Conv2D(10, (5, 5), padding='same', activation='relu')(layer_2)
-
-        layer_3 = MaxPooling2D((3, 3), strides=(1, 1), padding='same')(input_img)
-        layer_3 = Conv2D(10, (1, 1), padding='same', activation='relu')(layer_3)
-
-        mid_1 = concatenate([layer_1, layer_2, layer_3], axis=3)
-
-        flat_1 = Flatten()(mid_1)
-
-        dense_1 = Dense(600, activation='relu')(flat_1)
-        dense_2 = Dense(400, activation='relu')(dense_1)
-        dense_3 = Dense(150, activation='relu')(dense_2)
-        output = Dense(nClasses, activation='softmax')(dense_3)
-
-        model = Model([input_img], output)
+        # shape_x = 512
+        # shape_y = 512
+        # input_img = Input(shape=(shape_x, shape_y, 1))
+        #
+        # ### 1st layer
+        # layer_1 = Conv2D(10, (1, 1), padding='same', activation='relu')(input_img)
+        # layer_1 = Conv2D(10, (3, 3), padding='same', activation='relu')(layer_1)
+        #
+        # layer_2 = Conv2D(10, (1, 1), padding='same', activation='relu')(input_img)
+        # layer_2 = Conv2D(10, (5, 5), padding='same', activation='relu')(layer_2)
+        #
+        # layer_3 = MaxPooling2D((3, 3), strides=(1, 1), padding='same')(input_img)
+        # layer_3 = Conv2D(10, (1, 1), padding='same', activation='relu')(layer_3)
+        #
+        # mid_1 = concatenate([layer_1, layer_2, layer_3], axis=3)
+        #
+        # flat_1 = Flatten()(mid_1)
+        #
+        # dense_1 = Dense(600, activation='relu')(flat_1)
+        # dense_2 = Dense(400, activation='relu')(dense_1)
+        # dense_3 = Dense(150, activation='relu')(dense_2)
+        # output = Dense(nClasses, activation='softmax')(dense_3)
+        #
+        # model = Model([input_img], output)
 
         # plot_model(model, to_file='model.png', show_shapes=True, show_layer_names=True)
         model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
@@ -118,7 +118,7 @@ class Brain(DataGenerator):
             fill_mode="nearest")
 
         aug.fit(train_data)
-        batch_size = 16
+        batch_size = 64
         history = model.fit_generator(aug.flow(train_data, train_labels, batch_size=batch_size),
                                       steps_per_epoch=train_data.shape[0], epochs=20,
                                       validation_data=(valid_data, valid_labels))
