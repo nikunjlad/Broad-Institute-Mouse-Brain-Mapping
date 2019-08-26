@@ -42,7 +42,11 @@ class Brain(DataGenerator):
 
         train_data = np.resize(train_data, (train_data.shape[0],256,256))
         valid_data = np.resize(valid_data, (valid_data.shape[0],256,256))
-        test_data = np.resize(valid_data, (test_data.shape[0],256, 256))
+        test_data = np.resize(test_data, (test_data.shape[0],256, 256))
+
+        train_data = train_data.astype('float32')
+        valid_data = valid_data.astype('float32')
+        test_data = test_data.astype('float32')
 
         proc = Processing()
         colormap = "BGR2GRAY"
