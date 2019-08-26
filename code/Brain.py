@@ -40,6 +40,10 @@ class Brain(DataGenerator):
 
         print(valid_data.shape[1:])
 
+        train_data = np.resize(train_data, (train_data.shape[0],256,256))
+        valid_data = np.resize(valid_data, (valid_data.shape[0],256,256))
+        test_data = np.resize(valid_data, (test_data.shape[0],256, 256))
+
         proc = Processing()
         colormap = "BGR2GRAY"
         # reshape data in order to make it convolution ready
@@ -67,12 +71,10 @@ class Brain(DataGenerator):
         print("Testing labels: ", test_labels.shape)
 
         model = Sequential()
-        model.add(Conv2D(256, kernel_size=(7, 7), activation='relu', input_shape=input_shape))
-        model.add(MaxPooling2D(pool_size=(5, 5)))
-        model.add(Dropout(0.15))
-        model.add(Conv2D(128, (5, 5), activation='relu'))
+        model.add(Conv2D(64, kernel_size=(7, 7), activation='relu', input_shape=input_shape))
         model.add(MaxPooling2D(pool_size=(3, 3)))
-        model.add(Dropout(0.10))
+        model.add(Conv2D(128, kernel_size=(5, 5), activation='relu'))
+        model.add(MaxPooling2D(pool_size=(3, 3)))
         model.add(Flatten())
         model.add(Dense(32, activation='relu'))
         model.add(Dropout(0.25))
@@ -110,9 +112,7 @@ class Brain(DataGenerator):
         # plot_model(model, to_file='model.png', show_shapes=True, show_layer_names=True)
         model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
-        aug = ImageDataGenerator(
-            rotation_range=20,
-            fill_mode="nearest")
+        aug = ImageDataGenerator(rotation_range=20, fill_mode="nearest")
 
         aug.fit(train_data)
         batch_size = 64
