@@ -98,8 +98,8 @@ class Brain(DataGenerator):
 
         flat_1 = Flatten()(mid_1)
 
-        dense_1 = Dense(1200, activation='relu')(flat_1)
-        dense_2 = Dense(600, activation='relu')(dense_1)
+        dense_1 = Dense(600, activation='relu')(flat_1)
+        dense_2 = Dense(400, activation='relu')(dense_1)
         dense_3 = Dense(150, activation='relu')(dense_2)
         output = Dense(nClasses, activation='softmax')(dense_3)
 
