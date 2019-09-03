@@ -116,7 +116,7 @@ class Brain(DataGenerator):
         # model = Model([input_img], output)
 
         rn = Resnet()
-        model = rn.build_resnet_18(input_shape=input_shape, num_outputs=nClasses)
+        model = rn.build_resnet_50(input_shape=input_shape, num_outputs=nClasses)
         batch_size = 64
         nb_epoch = 200
         lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
@@ -150,7 +150,7 @@ class Brain(DataGenerator):
             aug.fit(train_data)
 
             history = model.fit_generator(aug.flow(train_data, train_labels, batch_size=batch_size),
-                                          steps_per_epoch=train_data.shape[0] // batch_size, epochs=20,
+                                          steps_per_epoch=train_data.shape[0] // batch_size, epochs=nb_epoch,
                                           validation_data=(valid_data, valid_labels),
                                           callbacks=[lr_reducer, early_stopper, csv_logger])
             print("History:", history)
