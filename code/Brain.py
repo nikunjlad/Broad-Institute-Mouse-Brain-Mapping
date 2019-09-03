@@ -117,8 +117,8 @@ class Brain(DataGenerator):
 
         rn = Resnet()
         model = rn.build_resnet_18(input_shape=input_shape, num_outputs=nClasses)
-        batch_size = 32
-        nb_epoch = 50
+        batch_size = 64
+        nb_epoch = 200
         lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
         early_stopper = EarlyStopping(min_delta=0.001, patience=10)
         csv_logger = CSVLogger('resnet18_brain.csv')
