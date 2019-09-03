@@ -13,7 +13,9 @@ from tensorflow.contrib.keras.api.keras.losses import categorical_crossentropy
 from tensorflow.contrib.keras.api.keras.optimizers import Adadelta
 from DataGenerator import *
 import tensorflow as tf
+from keras.callbacks import ReduceLROnPlateau, CSVLogger, EarlyStopping
 from keras.utils.vis_utils import plot_model
+from ResNet import *
 
 
 class Brain(DataGenerator):
@@ -40,9 +42,9 @@ class Brain(DataGenerator):
 
         print(valid_data.shape[1:])
 
-        train_data = np.resize(train_data, (train_data.shape[0],256,256))
-        valid_data = np.resize(valid_data, (valid_data.shape[0],256,256))
-        test_data = np.resize(test_data, (test_data.shape[0],256, 256))
+        train_data = np.resize(train_data, (train_data.shape[0], 256, 256))
+        valid_data = np.resize(valid_data, (valid_data.shape[0], 256, 256))
+        test_data = np.resize(test_data, (test_data.shape[0], 256, 256))
 
         train_data = train_data.astype('float32')
         valid_data = valid_data.astype('float32')
@@ -74,19 +76,19 @@ class Brain(DataGenerator):
         print("Validation labels: ", valid_labels.shape)
         print("Testing labels: ", test_labels.shape)
 
-        model = Sequential()
-        model.add(Conv2D(64, kernel_size=(7, 7), activation='relu', input_shape=input_shape))
-        model.add(MaxPooling2D(pool_size=(3, 3)))
-        model.add(Conv2D(128, kernel_size=(5, 5), activation='relu'))
-        model.add(MaxPooling2D(pool_size=(3, 3)))
-        model.add(Flatten())
-        model.add(Dense(32, activation='relu'))
-        model.add(Dropout(0.25))
-        model.add(Dense(3, activation='softmax'))
-
-        model.compile(loss=categorical_crossentropy,
-                      optimizer=Adadelta(),
-                      metrics=['accuracy'])
+        # model = Sequential()
+        # model.add(Conv2D(64, kernel_size=(7, 7), activation='relu', input_shape=input_shape))
+        # model.add(MaxPooling2D(pool_size=(3, 3)))
+        # model.add(Conv2D(128, kernel_size=(5, 5), activation='relu'))
+        # model.add(MaxPooling2D(pool_size=(3, 3)))
+        # model.add(Flatten())
+        # model.add(Dense(32, activation='relu'))
+        # model.add(Dropout(0.25))
+        # model.add(Dense(3, activation='softmax'))
+        #
+        # model.compile(loss=categorical_crossentropy,
+        #               optimizer=Adadelta(),
+        #               metrics=['accuracy'])
 
         # shape_x = 512
         # shape_y = 512
@@ -113,17 +115,44 @@ class Brain(DataGenerator):
         #
         # model = Model([input_img], output)
 
+        model = Resnet.build_resnet_18(input_shape, nClasses)
+        batch_size = 32
+        nb_epoch = 50
+        lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
+        early_stopper = EarlyStopping(min_delta=0.001, patience=10)
+        csv_logger = CSVLogger('resnet18_brain.csv')
+        augmentation = True
+
         # plot_model(model, to_file='model.png', show_shapes=True, show_layer_names=True)
         model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
-        aug = ImageDataGenerator(rotation_range=20, fill_mode="nearest")
+        if not augmentation:
+            model.fit(train_data, train_labels,
+                      batch_size=batch_size,
+                      nb_epoch=nb_epoch,
+                      validation_data=(test_data, test_labels),
+                      shuffle=True,
+                      callbacks=[lr_reducer, early_stopper, csv_logger])
+        else:
+            aug = ImageDataGenerator(
+                featurewise_center=False,  # set input mean to 0 over the dataset
+                samplewise_center=False,  # set each sample mean to 0
+                featurewise_std_normalization=False,  # divide inputs by std of the dataset
+                samplewise_std_normalization=False,  # divide each input by its std
+                zca_whitening=False,  # apply ZCA whitening
+                rotation_range=0,  # randomly rotate images in the range (degrees, 0 to 180)
+                width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
+                height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
+                horizontal_flip=True,  # randomly flip images
+                vertical_flip=False)  # randomly flip images
 
-        aug.fit(train_data)
-        batch_size = 64
-        history = model.fit_generator(aug.flow(train_data, train_labels, batch_size=batch_size),
-                                      steps_per_epoch=train_data.shape[0], epochs=20,
-                                      validation_data=(valid_data, valid_labels))
-        print("History:", history)
+            aug.fit(train_data)
+
+            history = model.fit_generator(aug.flow(train_data, train_labels, batch_size=batch_size),
+                                          steps_per_epoch=train_data.shape[0] // batch_size, epochs=20,
+                                          validation_data=(valid_data, valid_labels),
+                                          callbacks=[lr_reducer, early_stopper, csv_logger])
+            print("History:", history)
 
         scores = model.evaluate(x=valid_data, y=valid_labels)
         print("Scores:", scores)
