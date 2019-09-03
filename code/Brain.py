@@ -115,7 +115,7 @@ class Brain(DataGenerator):
         #
         # model = Model([input_img], output)
 
-        model = Resnet.build_resnet_18(input_shape, nClasses)
+        model = Resnet.build_resnet_18(input_shape=input_shape, num_outputs=nClasses)
         batch_size = 32
         nb_epoch = 50
         lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
