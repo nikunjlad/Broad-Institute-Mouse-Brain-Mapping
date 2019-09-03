@@ -235,9 +235,8 @@ class Resnet:
     def build_resnet_34(self, input_shape, num_outputs):
         return self.build(input_shape, num_outputs, self.basic_block, [3, 4, 6, 3])
 
-    def build_resnet_50(self,input_shape, num_outputs):
+    def build_resnet_50(self, input_shape, num_outputs):
         return self.build(input_shape, num_outputs, self.bottleneck, [3, 4, 6, 3])
-
 
     def build_resnet_101(self, input_shape, num_outputs):
         return self.build(input_shape, num_outputs, self.bottleneck, [3, 4, 23, 3])
