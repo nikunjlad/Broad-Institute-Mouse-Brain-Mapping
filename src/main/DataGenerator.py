@@ -2,15 +2,14 @@
 Created by nikunjlad on 2019-08-20
 
 """
-import os, shutil, sys, datetime
-import numpy as np
-from DataImport import *
-from Processing import *
-from sklearn.preprocessing import LabelEncoder
+import sys, datetime
+from .DataImport import *
+from .Wrangler import *
 
 
 class DataGenerator:
 
+    # constructor to
     def __init__(self, debug):
         self.debug = debug
 
@@ -23,9 +22,52 @@ class DataGenerator:
         code_path = os.path.dirname(os.path.abspath(__file__))
         paths["code_path"] = code_path  # getting the code_path
 
+        # we move one directory up to get the source directory, essentially code files and config directory
+        os.chdir("..")  # changing one directory up
+        paths["src_path"] = os.getcwd()  # getting the root_path
+
+        # check if the configuration directory exist for the code to run
+        if os.path.exists("configurations"):
+            print("Configurations exist!")
+        else:
+            print("Configurations don't exist!")
+            os.mkdir(os.path.sep.join([os.getcwd(), "configurations"]))
+        paths["config_path"] = os.path.sep.join([os.getcwd(), "configurations"])
+
         # we move one directory up to get the root directory, essentially our repository directory
         os.chdir("..")  # changing one directory up
         paths["root_path"] = os.getcwd()  # getting the root_path
+
+        # if output directory does not exist, then create one.
+        if os.path.exists("output"):
+            print("Output directory exists!")
+            os.chdir("output")
+
+            # check if models path exists
+            if not os.path.exists(os.path.sep.join([os.getcwd(), "models"])):
+                os.mkdir(os.path.sep.join([os.getcwd(), "models"]))
+
+            # check if plots path exists
+            if not os.path.exists(os.path.sep.join([os.getcwd(), "plots"])):
+                os.mkdir(os.path.sep.join([os.getcwd(), "plots"]))
+
+            os.chdir(paths["src_path"])
+        else:
+            print("Output Directory don't exist!")
+            os.mkdir(os.path.sep.join([os.getcwd(), "output"]))
+            os.mkdir(os.path.sep.join([os.getcwd(), "output/models"]))
+            os.mkdir(os.path.sep.join([os.getcwd(), "output/plots"]))
+        paths["output_path"] = os.path.sep.join([os.getcwd(), "output"])
+        paths["models_path"] = os.path.sep.join([os.getcwd(), "output/models"])
+        paths["plots_path"] = os.path.sep.join([os.getcwd(), "output/plots"])
+
+        # if logs directory does not exist, then create one.
+        if os.path.exists("logs"):
+            print("Logs directory exists!")
+        else:
+            print("Logs Directory don't exist!")
+            os.mkdir(os.path.sep.join([os.getcwd(), "logs"]))
+        paths["logs_path"] = os.path.sep.join([os.getcwd(), "logs"])
 
         # checking if the data_path exists or not
         if os.path.exists("data"):
@@ -36,22 +78,6 @@ class DataGenerator:
         else:
             print("Data Directory does not exist!")
             sys.exit(1)  # exit the program since no data directory exists
-
-        # check if the configuration directory exist for the code to run
-        if os.path.exists("configurations"):
-            print("Configurations exist!")
-        else:
-            print("Configurations don't exist!")
-            os.mkdir(os.path.sep.join([os.getcwd(), "configurations"]))
-        paths["config_path"] = os.path.sep.join([os.getcwd(), "configurations"])
-
-        # check if the temporary directory exists for the runtime files to be stored
-        if os.path.exists("temp"):
-            print("Temporary directory exists!")
-        else:
-            print("Temporary Directory don't exist!")
-            os.mkdir(os.path.sep.join([os.getcwd(), "temp"]))
-        paths["temp_path"] = os.path.sep.join([os.getcwd(), "temp"])
 
         # create a run_dir for the current file states and changes
         os.chdir(paths["temp_path"])
@@ -70,37 +96,6 @@ class DataGenerator:
             os.mkdir(os.path.sep.join([os.getcwd(), "binaries"]))
         paths["binary_path"] = os.path.sep.join([os.getcwd(), "binaries"])
 
-        # if output directory does not exist, then create one.
-        if os.path.exists("output"):
-            print("Output directory exists!")
-            os.chdir("output")
-
-            # check if models path exists
-            if not os.path.exists(os.path.sep.join([os.getcwd(), "models"])):
-                os.mkdir(os.path.sep.join([os.getcwd(), "models"]))
-
-            # check if plots path exists
-            if not os.path.exists(os.path.sep.join([os.getcwd(), "plots"])):
-                os.mkdir(os.path.sep.join([os.getcwd(), "plots"]))
-
-            os.chdir(paths["root_path"])
-        else:
-            print("Output Directory don't exist!")
-            os.mkdir(os.path.sep.join([os.getcwd(), "output"]))
-            os.mkdir(os.path.sep.join([os.getcwd(), "output/models"]))
-            os.mkdir(os.path.sep.join([os.getcwd(), "output/plots"]))
-        paths["output_path"] = os.path.sep.join([os.getcwd(), "output"])
-        paths["models_path"] = os.path.sep.join([os.getcwd(), "output/models"])
-        paths["plots_path"] = os.path.sep.join([os.getcwd(), "output/plots"])
-
-        # if logs directory does not exist, then create one.
-        if os.path.exists("logs"):
-            print("Logs directory exists!")
-        else:
-            print("Logs Directory don't exist!")
-            os.mkdir(os.path.sep.join([os.getcwd(), "logs"]))
-        paths["logs_path"] = os.path.sep.join([os.getcwd(), "logs"])
-
         # if in DEBUG mode, print this out to the console
         if self.debug:
             print("Code path: ", paths["code_path"])
@@ -113,6 +108,7 @@ class DataGenerator:
             print("Plots path: ", paths["plots_path"])
             print("Logs path: ", paths["logs_path"])
             print("Root path: ", paths["root_path"])
+            print("Source path: ", paths["src_path"])
 
         return paths
 
@@ -145,7 +141,7 @@ class DataGenerator:
                 test_data, test_labels = di.create_data_matrices(data["test_labels"], data["test_data"], colormap)
 
                 # resize images to a predefined size
-                proc = Processing()
+                proc = Wrangler()
                 train_matrix = proc.resize_images(Img_Size[0], Img_Size[1], train_data, colormap, paths["run_path"])
                 valid_matrix = proc.resize_images(Img_Size[0], Img_Size[1], valid_data, colormap, paths["run_path"])
                 test_matrix = proc.resize_images(Img_Size[0], Img_Size[1], test_data, colormap, paths["run_path"])
@@ -155,6 +151,7 @@ class DataGenerator:
                 valid_data = proc.create_numpy_data(valid_matrix)
                 test_data = proc.create_numpy_data(test_matrix)
 
+                # writing the binaries to disk
                 print("Writing data binaries to disk...")
                 binaries["train_data"] = os.path.sep.join([paths["binary_path"], "train_data.npy"])
                 binaries["train_labels"] = os.path.sep.join([paths["binary_path"], "train_labels.npy"])
@@ -163,6 +160,7 @@ class DataGenerator:
                 binaries["test_data"] = os.path.sep.join([paths["binary_path"], "test_data.npy"])
                 binaries["test_labels"] = os.path.sep.join([paths["binary_path"], "test_labels.npy"])
 
+                # save the binaries to path on the disk
                 np.save(binaries["train_data"], train_data)
                 np.save(binaries["valid_data"], valid_data)
                 np.save(binaries["test_data"], test_data)
@@ -185,40 +183,6 @@ class DataGenerator:
             sys.exit(1)
 
         return paths, binaries
-
-        # # reshape data in order to make it convolution ready
-        # input_shape, train_data, __, _ = proc.data_reshape(train_data, train_labels, colormap, 1)
-        # __, valid_data, __, ___ = proc.data_reshape(valid_data, valid_labels, colormap, 1)
-        # ___, test_data, classes, nClasses = proc.data_reshape(test_data, test_labels, colormap, 1)
-        #
-        # # scale images
-        # train_data = proc.scale_images(train_data, 255)
-        # valid_data = proc.scale_images(valid_data, 255)
-        # test_data = proc.scale_images(test_data, 255)
-        #
-        # train_labels = proc.do_one_hot_encoding(train_labels)
-        # valid_labels = proc.do_one_hot_encoding(valid_labels)
-        # test_labels = proc.do_one_hot_encoding(test_labels)
-        #
-        # # cnn = CNN(train_matrix, train_labels, test_matrix, test_labels)
-        # print(train_data.shape)
-        # print(valid_data.shape)
-        # print(test_data.shape)
-        # print(train_labels.shape)
-        # print(valid_labels.shape)
-        # print(test_labels.shape)
-        #
-        # # np.save(os.path.sep.join([self.model_path, "train_data.npy"]), train_data)
-        # # np.save(os.path.sep.join([self.model_path, "valid_data.npy"]), valid_data)
-        # # np.save(os.path.sep.join([self.model_path, "test_data.npy"]), test_data)
-        # # np.save(os.path.sep.join([self.model_path, "train_labels.npy"]), train_labels)
-        # # np.save(os.path.sep.join([self.model_path, "valid_labels.npy"]), valid_labels)
-        # # np.save(os.path.sep.join([self.model_path, "test_labels.npy"]), test_labels)
-        #
-        # plt.imshow(train_matrix[0])
-        # cv2.imwrite(self.temp_path + "/sample.png", train_matrix[0])
-        # plt.show()
-        # sys.exit(1)
 
 
 if __name__ == '__main__':

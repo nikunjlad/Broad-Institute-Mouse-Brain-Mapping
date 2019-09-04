@@ -3,5 +3,5 @@
 *.ipynb_checkpoints
 __pycache__/
 data/*
-binaries/*
+bin/*
 temp/*

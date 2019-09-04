@@ -3,36 +3,43 @@ Created by nikunjlad on 2019-08-24
 
 """
 
-import numpy as np
-import os, sys, datetime
 from tensorflow.contrib.keras.api.keras.preprocessing.image import ImageDataGenerator
-# from keras.preprocessing.image import ImageDataGenerator
-from tensorflow.contrib.keras.api.keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense, concatenate, Input
-from tensorflow.contrib.keras.api.keras.models import Sequential, Model
-from tensorflow.contrib.keras.api.keras.losses import categorical_crossentropy
-from tensorflow.contrib.keras.api.keras.optimizers import Adadelta
-from DataGenerator import *
+from .DataGenerator import *
 import tensorflow as tf
 from keras.callbacks import ReduceLROnPlateau, CSVLogger, EarlyStopping
 from keras.utils.vis_utils import plot_model
-from ResNet import *
+from .ResNet import *
 
 
 class Brain(DataGenerator):
 
+    # we inherit the DataGenerator class into the main class for we will be using it's properties there
     def __init__(self, debug):
+        """
+        :param debug: debug variable just checks if we need to debug the application so that DEBUG messages can be
+        printed.
+        """
         self.current_time = datetime.datetime.now().strftime("%Y-%m-%d__%H.%M")
-        super().__init__(debug)
+        super().__init__(debug)   # calling the Data Generator class with debug parameter as well.
         self.debug = debug
 
     def main(self):
+        """
+        :return: just completes training a network on ResNet architecture.
+        """
+        # setting environment variable to 2
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-        # tf.compat.v1.enable_eager_execution()
-        print(tf.version.VERSION)
 
-        Img_Size = [512, 512]
+        # when the flag is debug
+        if self.debug:
+            print(tf.version.VERSION)
 
-        paths, binaries = self.get_data()
+        Img_Size = [512, 512]  # make size of the image as 512 x 512
+
+        # get the paths and binaries, binaries are in .npy format and are like reusable pickle files
+        paths, binaries = self.get_data()   # with the current object access the Data Generator functions.
+
+        # load the data from the binaries dictionary.
         train_data = np.load(binaries["train_data"])
         valid_data = np.load(binaries["valid_data"])
         test_data = np.load(binaries["test_data"])
@@ -40,81 +47,47 @@ class Brain(DataGenerator):
         valid_labels = np.load(binaries["valid_labels"])
         test_labels = np.load(binaries["test_labels"])
 
-        print(valid_data.shape[1:])
+        if self.debug:
+            print(valid_data.shape[1:])
 
+        # once data is loaded resize it to 256x256 for network training. This is specific to this network since ResNet
+        # is to be trained
         train_data = np.resize(train_data, (train_data.shape[0], 256, 256))
         valid_data = np.resize(valid_data, (valid_data.shape[0], 256, 256))
         test_data = np.resize(test_data, (test_data.shape[0], 256, 256))
 
+        # change the datatype to float32
         train_data = train_data.astype('float32')
         valid_data = valid_data.astype('float32')
         test_data = test_data.astype('float32')
 
-        proc = Processing()
-        colormap = "BGR2GRAY"
+        # a wrangler object to do data wrangling, i.e to reshape data for training
+        proc = Wrangler()
+        colormap = "BGR2GRAY" # we would like to change the colormap of data from BGR to GRAY
         # reshape data in order to make it convolution ready
         input_shape, train_data, __, _ = proc.data_reshape(train_data, train_labels, colormap, 1)
         __, valid_data, __, ___ = proc.data_reshape(valid_data, valid_labels, colormap, 1)
         ___, test_data, classes, nClasses = proc.data_reshape(test_data, test_labels, colormap, 1)
 
-        # scale images
+        # scale images from 255 range to 0-1 for reducing pixel variation.
         train_data = proc.scale_images(train_data, 255)
         valid_data = proc.scale_images(valid_data, 255)
         test_data = proc.scale_images(test_data, 255)
 
+        # do one hot encoding of the data labels so as to convert from categorical to binary format per class
         train_labels = proc.do_one_hot_encoding(train_labels)
-        print(train_labels)
         valid_labels = proc.do_one_hot_encoding(valid_labels)
         test_labels = proc.do_one_hot_encoding(test_labels)
 
-        # cnn = CNN(train_matrix, train_labels, test_matrix, test_labels)
+        if self.debug:
+            print("Training data: ", train_data.shape)
+            print("Validation data: ", valid_data.shape)
+            print("Testing data: ", test_data.shape)
+            print("Training labels: ", train_labels.shape)
+            print("Validation labels: ", valid_labels.shape)
+            print("Testing labels: ", test_labels.shape)
 
-        print("Training data: ", train_data.shape)
-        print("Validation data: ", valid_data.shape)
-        print("Testing data: ", test_data.shape)
-        print("Training labels: ", train_labels.shape)
-        print("Validation labels: ", valid_labels.shape)
-        print("Testing labels: ", test_labels.shape)
-
-        # model = Sequential()
-        # model.add(Conv2D(64, kernel_size=(7, 7), activation='relu', input_shape=input_shape))
-        # model.add(MaxPooling2D(pool_size=(3, 3)))
-        # model.add(Conv2D(128, kernel_size=(5, 5), activation='relu'))
-        # model.add(MaxPooling2D(pool_size=(3, 3)))
-        # model.add(Flatten())
-        # model.add(Dense(32, activation='relu'))
-        # model.add(Dropout(0.25))
-        # model.add(Dense(3, activation='softmax'))
-        #
-        # model.compile(loss=categorical_crossentropy,
-        #               optimizer=Adadelta(),
-        #               metrics=['accuracy'])
-
-        # shape_x = 512
-        # shape_y = 512
-        # input_img = Input(shape=(shape_x, shape_y, 1))
-        #
-        # ### 1st layer
-        # layer_1 = Conv2D(10, (1, 1), padding='same', activation='relu')(input_img)
-        # layer_1 = Conv2D(10, (3, 3), padding='same', activation='relu')(layer_1)
-        #
-        # layer_2 = Conv2D(10, (1, 1), padding='same', activation='relu')(input_img)
-        # layer_2 = Conv2D(10, (5, 5), padding='same', activation='relu')(layer_2)
-        #
-        # layer_3 = MaxPooling2D((3, 3), strides=(1, 1), padding='same')(input_img)
-        # layer_3 = Conv2D(10, (1, 1), padding='same', activation='relu')(layer_3)
-        #
-        # mid_1 = concatenate([layer_1, layer_2, layer_3], axis=3)
-        #
-        # flat_1 = Flatten()(mid_1)
-        #
-        # dense_1 = Dense(600, activation='relu')(flat_1)
-        # dense_2 = Dense(400, activation='relu')(dense_1)
-        # dense_3 = Dense(150, activation='relu')(dense_2)
-        # output = Dense(nClasses, activation='softmax')(dense_3)
-        #
-        # model = Model([input_img], output)
-
+        # define ResNet object
         rn = Resnet()
         model = rn.build_resnet_50(input_shape=input_shape, num_outputs=nClasses)
         batch_size = 64
@@ -124,7 +97,7 @@ class Brain(DataGenerator):
         csv_logger = CSVLogger('resnet18_brain.csv')
         augmentation = True
 
-        # plot_model(model, to_file='model.png', show_shapes=True, show_layer_names=True)
+        plot_model(model, to_file='model.png', show_shapes=True, show_layer_names=True)
         model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
         if not augmentation:
@@ -161,5 +134,6 @@ class Brain(DataGenerator):
 
 
 if __name__ == "__main__":
+    """ """
     b = Brain(debug=False)
     b.main()

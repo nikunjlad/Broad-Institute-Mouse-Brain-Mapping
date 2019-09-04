@@ -4,8 +4,9 @@ Created by nikunjlad on 2019-08-20
 """
 from random import shuffle
 import os, shutil, cv2
-from Processing import *
+from Wrangler import *
 from sklearn.model_selection import train_test_split
+
 
 class DataImport:
 
@@ -43,7 +44,7 @@ class DataImport:
             else:
                 os.mkdir(path + "/" + categories)
 
-    def create_train_test_valid(self, categories, paths, split_ratio=(0.85,0.10,0.05)):
+    def create_train_test_valid(self, categories, paths, split_ratio=(0.85, 0.10, 0.05)):
         """
         This function is used to split data lying in different categorical folders into training, testing and validation
         Essentially our directory structure is transformed from: data
@@ -79,7 +80,7 @@ class DataImport:
         # loop through all the categories, make a list of all images lying in each categorical folder and append their
         # paths into a list. This list of paths corresponds to a categorical key in the dictionary
         for category in categories:
-            category_dir = os.path.sep.join([paths["data_path"],category])
+            category_dir = os.path.sep.join([paths["data_path"], category])
 
             dl = [category_dir + "/" + file for file in os.listdir(category_dir) if not file.startswith('.')]
             data_list.extend(dl)
@@ -104,9 +105,10 @@ class DataImport:
 
         combined = list(zip(data_list, label_list))
         shuffle(combined)
-        data_list[:], label_list[:]= zip(*combined)
+        data_list[:], label_list[:] = zip(*combined)
         tr_data, data_dict["test_data"], tr_labels, data_dict["test_labels"] = train_test_split(data_list, label_list,
-                                                                            test_size=split_ratio[2], random_state=42)
+                                                                                                test_size=split_ratio[
+                                                                                                    2], random_state=42)
         data_dict["train_data"], data_dict["valid_data"], data_dict["train_labels"], data_dict["valid_labels"] = \
             train_test_split(tr_data, tr_labels, test_size=split_ratio[1], random_state=42)
 
@@ -127,10 +129,8 @@ class DataImport:
             except Exception as e:
                 print(e)
 
-        combined = list(zip(data_matrix,label_matrix))
+        combined = list(zip(data_matrix, label_matrix))
         shuffle(combined)
         data_matrix[:], label_matrix[:] = zip(*combined)
 
         return data_matrix, label_matrix
-
-

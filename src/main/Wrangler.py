@@ -8,7 +8,8 @@ import numpy as np
 from tensorflow.contrib.keras.api.keras.utils import to_categorical
 from sklearn.preprocessing import LabelEncoder
 
-class Processing:
+
+class Wrangler:
 
     def __init__(self):
         pass
@@ -53,8 +54,7 @@ class Processing:
 
         return one_hot_encoded_labels
 
-    @staticmethod
-    def read_image(image_path, color_space=None):
+    def read_image(self, image_path, color_space=None):
         color_map = {'BGR2RGBA': cv2.COLOR_BGR2RGBA,
                      'BGR2GRAY': cv2.COLOR_BGR2GRAY,
                      'BGR2RGB': cv2.COLOR_BGR2RGB,
@@ -71,16 +71,16 @@ class Processing:
 
         return img
 
-    @staticmethod
-    def image_resize_with_aspect(height, width, img_path, fit_style, temp_path, color_map, padding="white", debug=False):
+    def image_resize_with_aspect(self, height, width, img_path, fit_style, temp_path, color_map, padding="white",
+                                 debug=False):
 
         if isinstance(img_path, np.ndarray):
             img = img_path
         else:
-            img = Processing.read_image(img_path, color_map)
+            img = self.read_image(img_path, color_map)
 
         if debug:
-            Processing.display_image(img)
+            self.display_image(img)
 
         # get the shape of the image
         if "GRAY" in color_map:
@@ -112,10 +112,11 @@ class Processing:
         # resizing the image and displaying it.
         try:
             new_img = cv2.resize(img, (int(img_w), int(img_h)), interpolation=cv2.INTER_AREA)
+
+            if debug:
+                self.display_image(new_img)
         except Exception as e:
             print(e)
-        if debug:
-            Processing.display_image(new_img)
 
         if padding is not None:
             # TIP: 0, 1 and border extension logic
@@ -123,9 +124,9 @@ class Processing:
             val = 0
             if padding == "extend":
                 if img_w == width:
-                    val = int((np.mean(img[0:5,:]) + np.mean(img[-5:,:])) / 2)
+                    val = int((np.mean(img[0:5, :]) + np.mean(img[-5:, :])) / 2)
                 elif img_h == height:
-                    val = int((np.mean(img[:,0:5]) + np.mean(img[:,-5:])) / 2)
+                    val = int((np.mean(img[:, 0:5]) + np.mean(img[:, -5:])) / 2)
                 print("Val :", val)
             elif padding == "white":
                 val = 255
@@ -134,7 +135,7 @@ class Processing:
 
             back_img = np.ones((height, width, 3), np.float32) * val
             cv2.imwrite(temp_path + "/image.png", back_img)
-            black_img = Processing.read_image(temp_path + "/image.png", color_map)
+            black_img = self.read_image(temp_path + "/image.png", color_map)
 
             # based on the resized image shapes, paste the original image on the  canvas with relevant offsets
             if img_w == width:
@@ -149,24 +150,23 @@ class Processing:
             black_img = new_img
 
         if debug:
-            Processing.display_image(black_img)
+            self.display_image(black_img)
 
         return black_img
 
-    @staticmethod
-    def resize_images(x_size, y_size, image, colormap, temp_path):
+    def resize_images(self, x_size, y_size, image, colormap, temp_path):
 
         if isinstance(image, list):
             image_matrix = list()
             for img in image:
-                resized_image = Processing.image_resize_with_aspect(y_size, x_size, img, "square", temp_path, colormap,
-                                                                    "extend", False)
+                resized_image = self.image_resize_with_aspect(y_size, x_size, img, "square", temp_path, colormap,
+                                                              "extend", False)
                 # resized_image = cv2.resize(img, (x_size, y_size))
                 image_matrix.append(resized_image)
             return image_matrix
         else:
-            resized_image = Processing.image_resize_with_aspect(y_size, x_size, image, "square", temp_path, colormap,
-                                                                "extend", False)
+            resized_image = self.image_resize_with_aspect(y_size, x_size, image, "square", temp_path, colormap,
+                                                          "extend", False)
             return resized_image
 
     @staticmethod
