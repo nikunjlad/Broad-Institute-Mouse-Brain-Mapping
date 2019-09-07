@@ -1,0 +1,30 @@
+{
+  "processing": {
+    "debug": [false, "bool"],
+    "imageSize": [[512,512], "list"],
+    "splitData": [false, "bool"],
+    "splitRatio": [[0.85,0.10,0.05],"list"],
+    "colorMap": ["BGR2GRAY","str"],
+    "fitStyle": ["square","str"],
+    "padding": ["extend","str"],
+    "dataType": ["float32","str"],
+    "imageDepth": [1, "int"],
+    "scaling": [255, "int"]
+  },
+  "resnet": {
+    "inputSize": [[256,256], "list"],
+    "batchSize": [64, "int"],
+    "epochs": [200, "int"],
+    "reduceFactor": [0.1,"float"],
+    "coolDown": [0, "int"],
+    "patience": [7, "int"],
+    "minRate": [0.5e-6, "float"],
+    "minDelta": [0.001, "float"],
+    "augmentation": [true, "bool"],
+    "optimizer": ["adam","str"],
+    "loss": ["binary_crossentropy","str"],
+    "metrics": [["accuracy"], "list"],
+    "verbose": [1, "int"]
+
+  }
+}
