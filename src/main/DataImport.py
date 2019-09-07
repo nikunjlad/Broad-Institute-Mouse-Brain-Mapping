@@ -4,7 +4,7 @@ Created by nikunjlad on 2019-08-20
 """
 from random import shuffle
 import os, shutil, cv2
-from main.Wrangler import *
+from Wrangler import *
 from sklearn.model_selection import train_test_split
 
 
