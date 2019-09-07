@@ -3,8 +3,8 @@ Created by nikunjlad on 2019-08-20
 
 """
 import sys, datetime, json
-from .DataImport import *
-from .Wrangler import *
+from DataImport import *
+from Wrangler import *
 
 
 class DataGenerator:
