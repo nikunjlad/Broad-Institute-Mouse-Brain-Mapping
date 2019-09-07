@@ -4,12 +4,12 @@ Created by nikunjlad on 2019-08-24
 """
 
 from tensorflow.contrib.keras.api.keras.preprocessing.image import ImageDataGenerator
-from main.DataGenerator import *
+from DataGenerator import *
 import tensorflow as tf
 from keras.callbacks import ReduceLROnPlateau, CSVLogger, EarlyStopping
 from keras.utils.vis_utils import plot_model
-from main.ResNet import *
-from main.Metrics import *
+from ResNet import *
+from Metrics import *
 import logging
 from configparser import ConfigParser
 
