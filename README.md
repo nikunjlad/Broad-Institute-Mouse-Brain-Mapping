@@ -4,8 +4,8 @@ Brain Mapping of Mouse Brain using Classification techniques
 Dataset downloaded from 
 http://brainmaps.org/HBP2/mus.musculus/
 
-Use below link to download dataset. Replace <url> with relevant 
-wget -r -np -R "index.html*" <url> -e robots=off
+Use below link to download dataset. Replace "url" with relevant 
+wget -r -np -R "index.html*" "url" -e robots=off
  
 CORONAL:
 All sub directories from this directory: http://brainmaps.org/HBP2/mus.musculus/cor/
